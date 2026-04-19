@@ -4,7 +4,6 @@ import { Button } from '../ui/Button';
 const FinalCTA = () => {
     return (
         <section className="py-32 bg-secondary/30 relative overflow-hidden">
-            {/* Background glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl -z-10" />
 
             <div className="max-w-4xl mx-auto px-4 text-center">

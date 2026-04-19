@@ -45,7 +45,6 @@ const Hero = () => {
                 </motion.div>
             </div>
 
-            {/* Decorative wave or gradient at bottom */}
             <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent" />
         </section>
     );

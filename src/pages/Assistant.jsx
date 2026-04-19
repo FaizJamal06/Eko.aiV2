@@ -1,64 +1,83 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Vapi from '@vapi-ai/web';
+import { useAppContext } from '../context/AppContext';
 import StartCallButton from '../components/StartCallButton';
 import TranscriptPanel from '../components/TranscriptPanel';
 import BookingConfirmation from '../components/BookingConfirmation';
-import UpcomingBookings from '../components/UpcomingBookings';
 import Navbar from '../components/Navbar';
 import '../index.css';
 
-// Initialize Vapi instance. Replace with actual Public Key from Vapi Dashboard.
-// Do not expose sensitive private keys.
 const vapi = new Vapi('83790b03-14a9-45be-90c2-590ea22b2bdd');
 
-// Replace with actual Assistant ID you configured in Vapi Dashboard.
 const ASSISTANT_ID = '3566be19-4473-43a9-8cbb-e837eff911ab';
 
+const SERVICES_DATA = {
+    "General Checkup": ["Dr. Sharma", "Dr. Gupta", "Dr. Patel"],
+    "Cardiology": ["Dr. Reddy", "Dr. Iyer"],
+    "Dentistry": ["Dr. Singh", "Dr. Verma"],
+    "Dermatology": ["Dr. Desai", "Dr. Kumar", "Dr. Joshi"]
+};
+
 function Assistant() {
-    const [callStatus, setCallStatus] = useState('idle'); // 'idle', 'connecting', 'active', 'ended'
+    const [callStatus, setCallStatus] = useState('idle');
     const [transcript, setTranscript] = useState([]);
     const [bookingDetails, setBookingDetails] = useState(null);
-
-    // Mock mock events for the demo
-    const [upcomingEvents, setUpcomingEvents] = useState([
-        { title: 'Project Kickoff', date: 'Oct 12', time: '10:00 AM', month: 'OCT', day: '12' },
-        { title: 'Design Review', date: 'Oct 15', time: '2:30 PM', month: 'OCT', day: '15' }
-    ]);
+    const [selectedService, setSelectedService] = useState('');
+    const { addAppointment, addInteraction, updateAgentStatus, incrementAgentCalls } = useAppContext();
 
     useEffect(() => {
-        // Vapi Event Listeners
-
-        // Call started
         vapi.on('call-start', () => {
             setCallStatus('active');
-            setTranscript([{ role: 'assistant', text: 'Hello! I am your AI booking assistant. How can I help you today?' }]);
+            setTranscript([{ role: 'assistant', text: 'Hi there! How is your day going? I\'d love to chat for a bit.' }]);
+            updateAgentStatus('ARSHAD', 'Active');
+            addInteraction({
+                agentId: 'ARSHAD',
+                title: 'Call Started',
+                details: 'User connected to AI assistant.',
+                type: 'INFO',
+                time: new Date().toLocaleTimeString()
+            });
         });
 
-        // Call ended
         vapi.on('call-end', () => {
             setCallStatus('ended');
-            // Reset after a few seconds to idle
             setTimeout(() => setCallStatus('idle'), 3000);
+            updateAgentStatus('ARSHAD', 'Available');
+            incrementAgentCalls('ARSHAD');
+            addInteraction({
+                agentId: 'ARSHAD',
+                title: 'Call Ended',
+                details: 'User disconnected from AI assistant.',
+                type: 'INFO',
+                time: new Date().toLocaleTimeString()
+            });
         });
 
-        // Transcript messages
         vapi.on('message', (message) => {
-            console.log('Vapi Message:', message); // ADDED: Debug all messages
+            console.log('Vapi Message:', message);
 
             if (message.type === 'transcript' && message.transcriptType === 'final') {
                 setTranscript((prev) => [
                     ...prev,
                     { role: message.role, text: message.transcript }
                 ]);
+                
+                addInteraction({
+                    agentId: 'ARSHAD',
+                    title: message.role === 'assistant' ? 'Agent Spoke' : 'User Spoke',
+                    details: message.transcript,
+                    type: 'TRANSCRIPT',
+                    time: new Date().toLocaleTimeString()
+                });
             }
 
-            // Listen for function calls or tool calls from Vapi built-in tools
             if (message.type === 'function-call' || message.type === 'tool-calls') {
                 console.log('Function or Tool Call received:', message);
 
-                // Let's check both functionCall format and toolCalls format
-                const callObj = message.functionCall || (message.toolCalls && message.toolCalls[0]?.function);
+                const callObj = message.functionCall || 
+                               (message.toolCallList && message.toolCallList[0]?.function) || 
+                               (message.toolCalls && message.toolCalls[0]?.function);
 
                 if (callObj) {
                     const args = callObj.arguments || callObj.parameters;
@@ -67,34 +86,39 @@ function Assistant() {
                     console.log('Parsed Args:', parsedArgs);
 
                     if (parsedArgs && parsedArgs.start_time) {
-                        setBookingDetails({
+                        const newBooking = {
                             title: parsedArgs.summary || 'Meeting',
                             date: new Date(parsedArgs.start_time).toLocaleDateString(),
                             time: new Date(parsedArgs.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                            duration: parsedArgs.duration_minutes || '30'
+                            duration: parsedArgs.duration_minutes ? `${parsedArgs.duration_minutes} min` : '30 min'
+                        };
+                        setBookingDetails(newBooking);
+                        
+                        addAppointment({
+                            id: Date.now(),
+                            date: newBooking.date,
+                            time: newBooking.time,
+                            doctor: 'Dr. Vapi AI',
+                            service: newBooking.title,
+                            status: 'Scheduled',
+                            duration: newBooking.duration
                         });
 
-                        // Add to upcoming events (demo logic)
-                        const newDate = new Date(parsedArgs.start_time);
-                        setUpcomingEvents(prev => [{
-                            title: parsedArgs.summary || 'Meeting',
-                            date: newDate.toLocaleDateString(),
-                            time: newDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                            month: newDate.toLocaleString('default', { month: 'short' }).toUpperCase(),
-                            day: newDate.getDate().toString()
-                        }, ...prev]);
+                        addInteraction({
+                            agentId: 'ARSHAD',
+                            title: 'Appointment Booked',
+                            details: `Booked ${newBooking.title} on ${newBooking.date} at ${newBooking.time}.`,
+                            type: 'BOOKING',
+                            time: new Date().toLocaleTimeString()
+                        });
                     }
                 }
             }
         });
-
-        // Error handling
         vapi.on('error', (e) => {
             console.error('Vapi Error:', e);
             setCallStatus('idle');
         });
-
-        // Cleanup listeners on unmount
         return () => {
             vapi.removeAllListeners();
         };
@@ -106,8 +130,8 @@ function Assistant() {
             setCallStatus('ended');
         } else {
             setCallStatus('connecting');
-            setTranscript([]); // clear transcript on new call
-            setBookingDetails(null); // clear old bookings
+            setTranscript([]);
+            setBookingDetails(null);
 
             vapi.start(ASSISTANT_ID);
         }
@@ -138,7 +162,45 @@ function Assistant() {
 
                     <div className="flex flex-col gap-6">
                         <BookingConfirmation eventDetails={bookingDetails} />
-                        <UpcomingBookings events={upcomingEvents} />
+                        
+                        <div className="glass-panel p-6 bg-card/50 border border-border rounded-xl shadow-lg mt-4">
+                            <h2 className="text-xl font-semibold mb-4 text-foreground">Services we provide</h2>
+                            <select 
+                                className="w-full p-3 rounded-md bg-background border border-border text-foreground mb-4 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+                                value={selectedService}
+                                onChange={(e) => setSelectedService(e.target.value)}
+                            >
+                                <option value="" disabled>Select a service...</option>
+                                {Object.keys(SERVICES_DATA).map(service => (
+                                    <option key={service} value={service}>{service}</option>
+                                ))}
+                            </select>
+
+                            {selectedService && (
+                                <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <h3 className="text-sm uppercase tracking-wider font-semibold mb-3 text-muted-foreground">Available Doctors</h3>
+                                    <div className="flex flex-col gap-3">
+                                        {SERVICES_DATA[selectedService].map((doctor, index) => (
+                                            <div key={index} className="px-4 py-3 rounded-lg bg-background/50 border border-border flex items-center justify-between hover:bg-secondary/20 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shadow-inner">
+                                                        {doctor.split(' ')[1]?.[0] || 'D'}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-foreground block">{doctor}</span>
+                                                        <span className="text-xs text-muted-foreground">{selectedService} Specialist</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                                    <span className="text-xs font-medium text-green-500">Available</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>

@@ -4,13 +4,11 @@ const ThemeToggle = () => {
     const [theme, setTheme] = useState('light');
 
     useEffect(() => {
-        // Check local storage or system preference on mount
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             setTheme(savedTheme);
             document.documentElement.classList.toggle('dark', savedTheme === 'dark');
         } else {
-            // Default to light
             setTheme('light');
             document.documentElement.classList.remove('dark');
         }
@@ -24,7 +22,6 @@ const ThemeToggle = () => {
     };
 
     return (
-        /* From Uiverse.io by Uncannypotato69 - Applied as JSX */
         <label
             className="cursor-pointer relative h-[3em] w-[6em] rounded-full bg-[hsl(0,0%,7%)] shadow-[0px_2px_4px_0px_rgb(18,18,18,0.25),0px_4px_8px_0px_rgb(18,18,18,0.35)] scale-50 -mr-4 md:mr-0 md:scale-75 origin-right"
             title="Toggle Theme"

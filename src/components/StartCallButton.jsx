@@ -2,7 +2,6 @@ import React from 'react';
 import './StartCallButton.css';
 
 const StartCallButton = ({ status, onToggleCall }) => {
-    // status: 'idle', 'connecting', 'active', 'ended'
 
     const getButtonText = () => {
         switch (status) {

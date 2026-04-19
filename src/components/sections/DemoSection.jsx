@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
 import VoiceWave from '../ui/VoiceWave';
 import { Play, Pause, MessageSquare, Phone } from 'lucide-react';
-import { cn } from '../../lib/utils'; // Keep relative path for now
+import { cn } from '../../lib/utils';
 
 const demos = [
     {
@@ -36,7 +36,6 @@ const DemoSection = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    // Simulate audio progress
     useEffect(() => {
         let interval;
         if (isPlaying) {
@@ -68,7 +67,6 @@ const DemoSection = () => {
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    {/* Left: Player & Controls */}
                     <div className="space-y-8">
                         <div className="flex gap-4 mb-4">
                             {demos.map((demo, idx) => (
@@ -131,7 +129,6 @@ const DemoSection = () => {
                         </div>
                     </div>
 
-                    {/* Right: Transcript */}
                     <div className="relative">
                         <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl blur-xl" />
                         <Card className="relative h-[500px] border-border/50 bg-card/80 backdrop-blur overflow-hidden flex flex-col">

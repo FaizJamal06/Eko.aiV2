@@ -12,11 +12,9 @@ const DashboardPreview = () => {
                     </p>
                 </div>
 
-                {/* Dashboard Mockup */}
                 <div className="rounded-xl border border-border/50 bg-background shadow-2xl overflow-hidden mb-20 relative">
                     <div className="absolute inset-0 bg-blue-500/5 pointer-events-none" />
 
-                    {/* Header */}
                     <div className="border-b border-border p-4 flex items-center justify-between bg-card/50">
                         <div className="flex gap-2">
                             <div className="w-3 h-3 rounded-full bg-red-500/50" />
@@ -27,9 +25,7 @@ const DashboardPreview = () => {
                         <div className="w-4" />
                     </div>
 
-                    {/* Content */}
                     <div className="p-6 md:p-8 grid md:grid-cols-4 gap-6">
-                        {/* Sidebar */}
                         <div className="hidden md:block space-y-2">
                             {['Overview', 'Calls', 'Contacts', 'Analytics', 'Settings'].map((item, i) => (
                                 <div key={item} className={`px-4 py-2 rounded-md text-sm font-medium ${i === 0 ? 'bg-secondary text-primary' : 'text-muted-foreground hover:bg-secondary/50'}`}>
@@ -38,7 +34,6 @@ const DashboardPreview = () => {
                             ))}
                         </div>
 
-                        {/* Main Area */}
                         <div className="md:col-span-3 space-y-6">
                             <div className="grid grid-cols-3 gap-4">
                                 {[
@@ -54,7 +49,6 @@ const DashboardPreview = () => {
                                 ))}
                             </div>
 
-                            {/* Chart Placeholder */}
                             <div className="h-64 rounded-lg bg-card border border-border relative overflow-hidden flex items-end px-4 gap-2 pt-10">
                                 {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 50, 65].map((h, i) => (
                                     <div key={i} className="flex-1 bg-blue-500/20 rounded-t-sm hover:bg-blue-500/40 transition-colors" style={{ height: `${h}%` }} />
@@ -64,7 +58,6 @@ const DashboardPreview = () => {
                     </div>
                 </div>
 
-                {/* Integrations */}
                 <div className="text-center">
                     <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-8">Works with your stack</p>
                     <div className="flex flex-wrap justify-center gap-4 md:gap-8">

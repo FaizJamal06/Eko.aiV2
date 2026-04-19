@@ -42,7 +42,6 @@ const HowItWorks = () => {
                 </div>
 
                 <div className="relative">
-                    {/* Connecting Line (Desktop) */}
                     <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-border -z-10" />
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">

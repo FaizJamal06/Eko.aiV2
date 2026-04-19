@@ -9,7 +9,6 @@ const Trust = () => {
                 <div className="text-center mb-12">
                     <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Trusted by innovative teams</p>
                     <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Mock Logos - Replace with images if available, using text for now */}
                         {['TechCorp', 'GlobalHealth', 'EdStart', 'Shopify', 'Twilio'].map((logo) => (
                             <span key={logo} className="text-2xl font-bold text-foreground/50">{logo}</span>
                         ))}
